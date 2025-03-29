@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Delete Trek{% endblock %}
+{% block content %}
+    <h1 class="text-3xl font-bold text-center my-6">Delete Trek - {{ trek.name }}</h1>
+    <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md text-center">
+        <p class="text-red-600">Are you sure you want to delete this trek?</p>
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="w-full px-4 py-2 bg-red-600 text-white rounded mt-4">Confirm Delete</button>
+        </form>
+        <a href="{% url 'view_all_treks' %}" class="block mt-4 text-blue-600">Cancel</a>
+    </div>
+{% endblock %}

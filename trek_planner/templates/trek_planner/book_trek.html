@@ -1,0 +1,164 @@
+
+{% extends 'trek_planner/base.html' %}
+{% load static %}  <!-- ✅ Load static files at the top -->
+
+{% block title %}Book Trek - {{ trek.name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    {% if messages %}
+    <div class="container mx-auto px-4 mt-4">
+        {% for message in messages %}
+            <div class="p-4 mb-4 text-white rounded-lg shadow-md 
+                {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium">{{ message }}</span>
+                     <button onclick="this.parentElement.parentElement.style.display='none'" class="text-white focus:outline-none"> 
+                        ✖
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    </div> 
+{% endif %} 
+    <h1 class="text-3xl font-bold mb-6 text-center">Book Your Trek</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Trek Information Card -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">{{ trek.name }}</h2>
+            <img src="{{ trek.image.url }}" alt="{{ trek.name }}" class="w-full h-56 object-cover rounded-lg mb-4">
+            
+            <p class="text-gray-700 mb-4">{{ trek.description }}</p>
+            
+            <div class="grid grid-cols-2 gap-4 text-gray-700">
+                <p><strong>📍 Location:</strong> {{ trek.location }}</p>
+                <p><strong>📅 Date:</strong> {{ trek.date }}</p>
+                <p><strong>⏰ Time:</strong> {{ trek.time }}</p>
+                <p><strong>🏔 Elevation:</strong> {{ trek.elevation }}m</p>
+                <p><strong>📏 Distance:</strong> {{ trek.distance }}km</p>
+                <p><strong>⚠ Difficulty:</strong> {{ trek.difficulty }}</p>
+                <p><strong>👥 Max Participants:</strong> {{ trek.max_participants }}</p>
+                <p><strong>💰 Price:</strong> ₹{{ trek.price }}</p>
+            </div>
+        </div>
+
+        <!-- User Information & Payment -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Your Information</h2>
+            
+            <div class="bg-gray-100 p-4 rounded-md mb-4">
+                <p><strong>👤 Name:</strong> {{ request.user.get_full_name|default:request.user.username }}</p>
+                <p><strong>✉  Email:</strong> {{ user.email }}</p>
+            </div>
+
+            <div class="border-t my-4"></div>
+
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Make Payment</h2>
+            
+            <!-- QR Code Payment -->
+            <div class="flex justify-center mb-4">
+                <img src="{% static 'images/upi_qr_code.jpg' %}" alt="UPI Payment QR Code" class="h-48 w-48">
+            </div>
+
+            <p class="text-gray-600 text-sm text-center mb-4">
+                Scan the QR code to proceed with payment.
+            </p>
+
+            <form enctype="multipart/form-data" method="POST">
+                {% csrf_token %}
+                
+               
+
+                <div class="mb-4">
+                    <label for="{{ form.payment_screenshot.id_for_label }}" class="block text-gray-700 font-medium mb-2">Upload Payment Screenshot</label>
+                    <div class="mb-4">
+                        {{ form.payment_screenshot }}
+                        {% for error in form.payment_screenshot.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+                    Submit Booking
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %} 
+
+
+
+{% comment %} {% extends 'trek_planner/base.html' %}
+{% load static %}
+{% block title %}Book Trek - {{ trek.name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <!-- Page Header -->
+  <h1 class="text-3xl font-bold mb-6 text-center">Book Trek: {{ trek.name }}</h1>
+  
+  <!-- Cards Section -->
+  <div class="flex flex-col md:flex-row gap-6 mb-8">
+    <!-- Trek Details Card -->
+    <div class="bg-white shadow rounded-lg p-6 flex-1">
+      {% if trek.image %}
+      <img src="{{ trek.image.url }}" alt="{{ trek.name }}" class="h-48 w-full object-cover rounded-md mb-4">
+      {% endif %}
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ trek.name }}</h2>
+      <p class="text-gray-600 mb-4">{{ trek.description }}</p>
+      <p class="text-gray-700"><strong>Location:</strong> {{ trek.location }}</p>
+      <p class="text-gray-700"><strong>Date:</strong> {{ trek.date }}</p>
+      <p class="text-gray-700"><strong>Time:</strong> {{ trek.time }}</p>
+      <p class="text-gray-700"><strong>Price:</strong> ₹{{ trek.price }}</p>
+      <p class="text-gray-700"><strong>Max Participants:</strong> {{ trek.max_participants }}</p>
+    </div>
+    
+    <!-- User Information Card -->
+    <div class="bg-white shadow rounded-lg p-6 flex-1">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Information</h2>
+      <p class="text-gray-700"><strong>Name:</strong> {{ request.user.get_full_name|default:request.user.username }}</p>
+      <p class="text-gray-700"><strong>Email:</strong> {{ request.user.email }}</p>
+      <!-- Add any additional fields as needed -->
+    </div>
+  </div>
+  
+  <!-- Payment Section -->
+  <div class="bg-white shadow-lg p-6 rounded-lg">
+    <h2 class="text-xl font-semibold mb-4">Make Payment</h2>
+    
+    <!-- QR Code for UPI Payment -->
+    <div class="flex justify-center mb-4">
+      <img src="{% static 'images/upi_qr_code.png' %}" alt="UPI Payment QR Code" class="h-48 w-48">
+    </div>
+    <p class="text-gray-600 text-sm text-center mb-6">
+      Scan the QR code or enter UPI ID below to make the payment.
+    </p>
+    
+    <!-- Payment Form -->
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-2">Enter UPI ID</label>
+        {{ form.upi_id }}
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-2">Upload Payment Screenshot</label>
+        {{ form.payment_screenshot }}
+      </div>
+      
+      <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+        Submit Booking
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %} {% endcomment %}
+
+

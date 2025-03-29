@@ -1,0 +1,49 @@
+{% extends 'trek_planner/base.html' %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Edit Profile</h1>
+    
+    <div class="bg-white shadow-lg p-6 rounded-lg">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">First Name</label>
+                    {{ user_form.first_name }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Last Name</label>
+                    {{ user_form.last_name }}
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">Email</label>
+                {{ user_form.email }}
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">Phone</label>
+                {{ profile_form.phone }}
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">Address</label>
+                {{ profile_form.address }}
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">Profile Picture</label>
+                {{ profile_form.profile_picture }}
+            </div>
+
+            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Save Changes
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

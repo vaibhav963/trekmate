@@ -1,0 +1,28 @@
+{% extends 'trek_planner/base.html' %}
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Your Profile</h1>
+    <div class="bg-white shadow-lg p-6 rounded-lg">
+        <div class="flex items-center space-x-6">
+            {% with profile_picture_url=request.user.userprofile.profile_picture.url %}
+            {% if profile_picture_url %}
+                <img src="{{ profile_picture_url }}" alt="Profile Picture" class="h-24 w-24 rounded-full border">
+            {% else %}
+                <img src="https://via.placeholder.com/100" alt="Profile Picture" class="h-24 w-24 rounded-full border">
+            {% endif %}
+            {% endwith %}
+            <div>
+                <p class="text-gray-800 text-xl font-semibold">{{ request.user.get_full_name }}</p>
+                <p class="text-gray-600">{{ request.user.email }}</p>
+                <p class="text-gray-600"><strong>Phone:</strong> {{ request.user.userprofile.phone }}</p>
+                <p class="text-gray-600"><strong>Address:</strong> {{ request.user.userprofile.address }}</p>
+            </div>
+        </div>
+        <a href="{% url 'edit_profile' %}" class="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Edit Profile
+        </a>
+    </div>
+</div>
+{% endblock %}

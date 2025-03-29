@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TrekMate{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Navigation -->
+    <nav class="bg-emerald-700 text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-mountain text-2xl"></i>
+                    <a href="{% url 'view_all_treks' %}" class="text-2xl font-bold">TrekMate</a>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="{% url 'view_all_treks' %}" class="hover:text-emerald-200 transition">Home</a>
+                    {% comment %} <a href="{% url 'view_all_treks' %}" class="hover:text-emerald-200 transition">Treks</a>
+                    <a href="#" class="hover:text-emerald-200 transition">Destinations</a> {% endcomment %}
+                    <a href="{% url 'aboutus' %}" class="hover:text-emerald-200 transition">About Us</a>
+                    <a href="#footer" class="hover:text-emerald-200 transition scroll-smooth">Contact</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <div class="relative group">
+                            <button class="flex items-center space-x-1 hover:text-emerald-200 transition">
+                                <span>{{ user.username }}</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            <div class="absolute right-0 w-48 bg-white text-gray-800 shadow-lg rounded-md py-2 mt-2 invisible group-hover:visible z-50">
+                                {% comment %} <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100">Profile</a> {% endcomment %}
+                                {% if not user.is_staff %}
+                                <a href="{% url 'user_bookings' %}" class="block px-4 py-2 hover:bg-gray-100">My Bookings</a>
+                                {% endif %}
+                                {% comment %} <a href="#" class="block px-4 py-2 hover:bg-gray-100">Settings</a> {% endcomment %}
+                                <hr class="my-1">
+                                <a href="{% url 'logout' %}" class="block px-4 py-2 hover:bg-gray-100">Logout</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="hover:text-emerald-200 transition">Login</a>
+                        <a href="{% url 'register' %}" class="bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-md transition">Sign Up</a>
+                    {% endif %}
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-white focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-emerald-800">
+            <div class="container mx-auto px-4 py-3 space-y-3">
+                <a href="{% url 'view_all_treks' %}" class="block hover:text-emerald-200 transition">Home</a>
+                <a href="{% url 'view_all_treks' %}" class="block hover:text-emerald-200 transition">Treks</a>
+                <a href="#" class="block hover:text-emerald-200 transition">Destinations</a>
+                <a href="#" class="block hover:text-emerald-200 transition">About Us</a>
+                <a href="#" class="block hover:text-emerald-200 transition">Contact</a>
+                <hr class="border-emerald-600">
+                {% if user.is_authenticated %}
+                    <a href="#" class="block hover:text-emerald-200 transition">Profile</a>
+                    {% if not is_staff %}
+                        <a href="{% url 'user_bookings' %}" class="block hover:text-emerald-200 transition">My Bookings</a>
+                    {% endif %}
+                    <a href="{% url 'logout' %}" class="block hover:text-emerald-200 transition">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="block hover:text-emerald-200 transition">Login</a>
+                    <a href="{% url 'register' %}" class="block bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-md transition text-center">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12" id="footer">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">TrekMate</h3>
+                    <p class="text-gray-300">Your ultimate companion for trekking adventures. Discover new trails, meet expert guides, and embark on unforgettable journeys.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'view_all_treks' %}" class="text-gray-300 hover:text-white">Home</a></li>
+                        <li><a href="{% url 'view_all_treks' %}" class="text-gray-300 hover:text-white">Treks</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Destinations</a></li>
+                        <li><a href="{% url 'aboutus' %}" class="text-gray-300 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-white">FAQ</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Cancellation Policy</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Safety Guidelines</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start space-x-2">
+                            <i class="fas fa-map-marker-alt mt-1"></i>
+                            <span>156/78, 14thA Cross, 2nd Main, Garden Layout, JP Nagar 7th Phase</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-phone"></i>
+                            <span>123-456-7890</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-envelope"></i>
+                            <span>info.trekmate@gmail.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <p>&copy; {% now "Y" %} TrekMate. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+
+
+
+
+
+
+

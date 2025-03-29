@@ -1,0 +1,545 @@
+{% extends 'trek_planner/base.html' %}
+{% block title %}Admin Bookings - TrekMate{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold text-gray-800 mb-6">Booking Details</h1>
+  
+  <!-- Search and Filter Controls -->
+  <div class="bg-white p-4 shadow rounded-lg mb-6">
+    <div class="flex flex-col md:flex-row gap-4">
+      <div class="w-full md:w-1/3">
+        <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+        <input type="text" id="search" placeholder="Search by username or trek name..." 
+               class="w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+      </div>
+      
+      <div class="w-full md:w-1/3">
+        <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Status</label>
+        <select id="status-filter" class="w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+          <option value="">All Statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Cancelled">Cancelled</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
+      
+      <div class="w-full md:w-1/3">
+        <label for="date-filter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
+        <select id="date-filter" class="w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+          <option value="">All Dates</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+          <option value="custom">Custom Range</option>
+        </select>
+      </div>
+    </div>
+    
+    <!-- Custom Date Range (hidden by default) -->
+    <div id="custom-date-range" class="hidden mt-4 flex gap-4">
+      <div class="w-1/2">
+        <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+        <input type="date" id="start-date" class="w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+      </div>
+      <div class="w-1/2">
+        <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+        <input type="date" id="end-date" class="w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+      </div>
+    </div>
+    
+    <div class="mt-4 flex justify-end">
+      <button id="apply-filters" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
+        Apply Filters
+      </button>
+    </div>
+  </div>
+  
+  <!-- Bookings Table -->
+  <div class="overflow-x-auto bg-white shadow rounded-lg">
+    <table class="min-w-full">
+      <thead>
+        <tr>
+          <th class="py-3 px-5 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-200" data-sort="user">
+            User <span class="ml-1">↕</span>
+          </th>
+          <th class="py-3 px-5 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-200" data-sort="trek">
+            Trek Name <span class="ml-1">↕</span>
+          </th>
+          <th class="py-3 px-5 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-200" data-sort="date">
+            Booking Date <span class="ml-1">↕</span>
+          </th>
+          <th class="py-3 px-5 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-200" data-sort="status">
+            Status <span class="ml-1">↕</span>
+          </th>
+          <th class="py-3 px-5 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+        <tr class="border-b hover:bg-gray-50 booking-row" 
+            data-user="{{ booking.user.username|lower }}" 
+            data-trek="{{ booking.trek.name|lower }}"
+            data-status="{{ booking.status|lower }}"
+            data-date="{{ booking.booking_date|date:'Y-m-d' }}">
+          <td class="py-3 px-5">
+            <div class="flex items-center">
+              <div class="h-8 w-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                <span class="text-sm font-medium text-indigo-800">{{ booking.user.username|slice:":1"|upper }}</span>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">{{ booking.user.username }}</p>
+                <p class="text-sm text-gray-500">{{ booking.user.email }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="py-3 px-5">
+            <span class="font-medium text-gray-900">{{ booking.trek.name }}</span>
+          </td>
+          <td class="py-3 px-5">{{ booking.booking_date|date:"M d, Y H:i" }}</td>
+          <td class="py-3 px-5">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+              {% if booking.status == 'Confirmed' %}
+                bg-green-100 text-green-800
+              {% elif booking.status == 'Pending' %}
+                bg-yellow-100 text-yellow-800
+              {% elif booking.status == 'Cancelled' %}
+                bg-red-100 text-red-800
+              {% else %}
+                bg-blue-100 text-blue-800
+              {% endif %}">
+              {{ booking.status }}
+            </span>
+          </td>
+          <td class="py-3 px-5">
+            <div class="flex space-x-2">
+              <button class="view-details-btn text-indigo-600 hover:text-indigo-900" data-booking-id="{{ booking.id }}">
+                View
+              </button>
+              <button class="update-status-btn text-green-600 hover:text-green-900" data-booking-id="{{ booking.id }}">
+                Update
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td class="py-8 px-5 text-center text-gray-500" colspan="5">No bookings found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Pagination -->
+  {% if bookings.has_other_pages %}
+  <div class="flex items-center justify-between bg-white px-4 py-3 mt-6 shadow rounded-lg">
+    <div class="flex flex-1 justify-between sm:hidden">
+      {% if bookings.has_previous %}
+        <a href="?page={{ bookings.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          Previous
+        </a>
+      {% endif %}
+      {% if bookings.has_next %}
+        <a href="?page={{ bookings.next_page_number }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          Next
+        </a>
+      {% endif %}
+    </div>
+    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+      <div>
+        <p class="text-sm text-gray-700">
+          Showing page {{ bookings.number }} of {{ bookings.paginator.num_pages }}
+        </p>
+      </div>
+      <div>
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+          {% if bookings.has_previous %}
+            <a href="?page={{ bookings.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <span class="sr-only">Previous</span>
+              <!-- Left chevron icon -->
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </a>
+          {% endif %}
+          
+          {% for i in bookings.paginator.page_range %}
+            {% if bookings.number == i %}
+              <span class="relative inline-flex items-center px-4 py-2 border border-indigo-500 bg-indigo-50 text-sm font-medium text-indigo-600">
+                {{ i }}
+              </span>
+            {% else %}
+              <a href="?page={{ i }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                {{ i }}
+              </a>
+            {% endif %}
+          {% endfor %}
+          
+          {% if bookings.has_next %}
+            <a href="?page={{ bookings.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <span class="sr-only">Next</span>
+              <!-- Right chevron icon -->
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </a>
+          {% endif %}
+        </nav>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Booking Details Modal -->
+<div id="booking-details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full flex items-center justify-center">
+  <div class="relative bg-white rounded-lg max-w-lg mx-auto p-6 shadow-xl">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold text-gray-900">Booking Details</h3>
+      <button class="close-modal text-gray-400 hover:text-gray-500">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div id="booking-details-content" class="space-y-4">
+      <!-- This will be populated by JavaScript -->
+    </div>
+    <div class="mt-6 flex justify-end">
+      <button class="close-modal bg-gray-200 text-gray-800 px-4 py-2 mr-2 rounded hover:bg-gray-300 transition-colors">
+        Close
+      </button>
+      <button id="update-booking-btn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition-colors">
+        Update Status
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Update Status Modal -->
+<div id="update-status-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full flex items-center justify-center">
+  <div class="relative bg-white rounded-lg max-w-md mx-auto p-6 shadow-xl">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold text-gray-900">Update Booking Status</h3>
+      <button class="close-modal text-gray-400 hover:text-gray-500">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label for="new-status" class="block text-sm font-medium text-gray-700 mb-1">New Status</label>
+        <select id="new-status" class="w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+          <option value="Pending">Pending</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Cancelled">Cancelled</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
+      <div>
+        <label for="status-note" class="block text-sm font-medium text-gray-700 mb-1">Note (Optional)</label>
+        <textarea id="status-note" rows="3" class="w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                 placeholder="Add a note about this status change..."></textarea>
+      </div>
+      <div>
+        <label class="flex items-center">
+          <input type="checkbox" id="notify-user" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+          <span class="ml-2 text-sm text-gray-700">Notify user about this change</span>
+        </label>
+      </div>
+    </div>
+    <div class="mt-6 flex justify-end">
+      <button class="close-modal bg-gray-200 text-gray-800 px-4 py-2 mr-2 rounded hover:bg-gray-300 transition-colors">
+        Cancel
+      </button>
+      <button id="save-status-btn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition-colors">
+        Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Variables to store current sort state
+    let currentSort = { column: null, direction: 'asc' };
+    let currentBookingId = null;
+
+    // Date filter toggle for custom range
+    document.getElementById('date-filter').addEventListener('change', function() {
+      const customRangeDiv = document.getElementById('custom-date-range');
+      if (this.value === 'custom') {
+        customRangeDiv.classList.remove('hidden');
+      } else {
+        customRangeDiv.classList.add('hidden');
+      }
+    });
+
+    // Apply filters button
+    document.getElementById('apply-filters').addEventListener('click', function() {
+      filterBookings();
+    });
+
+    // Table header sorting
+    document.querySelectorAll('th[data-sort]').forEach(header => {
+      header.addEventListener('click', function() {
+        const column = this.getAttribute('data-sort');
+        const direction = (currentSort.column === column && currentSort.direction === 'asc') ? 'desc' : 'asc';
+        
+        // Update current sort state
+        currentSort.column = column;
+        currentSort.direction = direction;
+        
+        // Update sort indicators in headers
+        document.querySelectorAll('th[data-sort] span').forEach(span => {
+          span.textContent = '↕';
+        });
+        this.querySelector('span').textContent = direction === 'asc' ? '↑' : '↓';
+        
+        sortTable(column, direction);
+      });
+    });
+
+    // Function to filter bookings
+    function filterBookings() {
+      const searchTerm = document.getElementById('search').value.toLowerCase();
+      const statusFilter = document.getElementById('status-filter').value.toLowerCase();
+      const dateFilter = document.getElementById('date-filter').value;
+      
+      let startDate = null;
+      let endDate = null;
+      
+      // Process date filter
+      if (dateFilter === 'custom') {
+        startDate = document.getElementById('start-date').value;
+        endDate = document.getElementById('end-date').value;
+      } else if (dateFilter === 'today') {
+        const today = new Date();
+        startDate = today.toISOString().split('T')[0];
+        endDate = startDate;
+      } else if (dateFilter === 'week') {
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - dayOfWeek);
+        startDate = startOfWeek.toISOString().split('T')[0];
+        endDate = new Date().toISOString().split('T')[0];
+      } else if (dateFilter === 'month') {
+        const today = new Date();
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        startDate = startOfMonth.toISOString().split('T')[0];
+        endDate = new Date().toISOString().split('T')[0];
+      }
+      
+      // Filter rows
+      document.querySelectorAll('.booking-row').forEach(row => {
+        const user = row.getAttribute('data-user');
+        const trek = row.getAttribute('data-trek');
+        const status = row.getAttribute('data-status');
+        const date = row.getAttribute('data-date');
+        
+        let showRow = true;
+        
+        // Apply search filter
+        if (searchTerm && !(user.includes(searchTerm) || trek.includes(searchTerm))) {
+          showRow = false;
+        }
+        
+        // Apply status filter
+        if (statusFilter && status !== statusFilter) {
+          showRow = false;
+        }
+        
+        // Apply date filter
+        if (startDate && endDate) {
+          if (date < startDate || date > endDate) {
+            showRow = false;
+          }
+        }
+        
+        // Show or hide row
+        row.style.display = showRow ? '' : 'none';
+      });
+    }
+
+    // Function to sort table
+    function sortTable(column, direction) {
+      const tbody = document.querySelector('tbody');
+      const rows = Array.from(document.querySelectorAll('.booking-row'));
+      
+      const sortedRows = rows.sort((a, b) => {
+        let aValue, bValue;
+        
+        if (column === 'user') {
+          aValue = a.getAttribute('data-user');
+          bValue = b.getAttribute('data-user');
+        } else if (column === 'trek') {
+          aValue = a.getAttribute('data-trek');
+          bValue = b.getAttribute('data-trek');
+        } else if (column === 'date') {
+          aValue = a.getAttribute('data-date');
+          bValue = b.getAttribute('data-date');
+        } else if (column === 'status') {
+          aValue = a.getAttribute('data-status');
+          bValue = b.getAttribute('data-status');
+        }
+        
+        if (direction === 'asc') {
+          return aValue.localeCompare(bValue);
+        } else {
+          return bValue.localeCompare(aValue);
+        }
+      });
+      
+      // Clear and re-append rows
+      while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+      }
+      
+      sortedRows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Handle view details button clicks
+    document.querySelectorAll('.view-details-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const bookingId = this.getAttribute('data-booking-id');
+        currentBookingId = bookingId;
+        
+        // In a real application, you would fetch booking details from the server
+        // For this example, we'll simulate with mock data
+        const bookingRow = this.closest('tr');
+        const username = bookingRow.querySelector('td:nth-child(1)').textContent.trim();
+        const trekName = bookingRow.querySelector('td:nth-child(2)').textContent.trim();
+        const bookingDate = bookingRow.querySelector('td:nth-child(3)').textContent.trim();
+        const status = bookingRow.querySelector('td:nth-child(4)').textContent.trim();
+        
+        // Populate modal content
+        const detailsContent = document.getElementById('booking-details-content');
+        detailsContent.innerHTML = `
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">Booking ID</p>
+            <p class="font-medium">#${bookingId}</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">User</p>
+            <p class="font-medium">${username}</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">Trek</p>
+            <p class="font-medium">${trekName}</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">Booking Date</p>
+            <p class="font-medium">${bookingDate}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Status</p>
+            <p class="font-medium">${status}</p>
+          </div>
+        `;
+        
+        // Show modal
+        document.getElementById('booking-details-modal').classList.remove('hidden');
+      });
+    });
+
+    // Handle update status button clicks
+    document.querySelectorAll('.update-status-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const bookingId = this.getAttribute('data-booking-id');
+        currentBookingId = bookingId;
+        
+        // Get current status from row
+        const bookingRow = this.closest('tr');
+        const currentStatus = bookingRow.querySelector('td:nth-child(4)').textContent.trim();
+        
+        // Set current status in dropdown
+        document.getElementById('new-status').value = currentStatus;
+        
+        // Show modal
+        document.getElementById('update-status-modal').classList.remove('hidden');
+      });
+    });
+
+    // Close modals when clicking the close button
+    document.querySelectorAll('.close-modal').forEach(button => {
+      button.addEventListener('click', function() {
+        document.getElementById('booking-details-modal').classList.add('hidden');
+        document.getElementById('update-status-modal').classList.add('hidden');
+      });
+    });
+
+    // Update status from details modal
+    document.getElementById('update-booking-btn').addEventListener('click', function() {
+      document.getElementById('booking-details-modal').classList.add('hidden');
+      document.getElementById('update-status-modal').classList.remove('hidden');
+    });
+
+    // Save status changes
+    document.getElementById('save-status-btn').addEventListener('click', function() {
+      const newStatus = document.getElementById('new-status').value;
+      const note = document.getElementById('status-note').value;
+      const notify = document.getElementById('notify-user').checked;
+      
+      // In a real application, you would send this data to the server
+      console.log({
+        bookingId: currentBookingId,
+        newStatus: newStatus,
+        note: note,
+        notify: notify
+      });
+      
+      // For this example, update the UI directly
+      document.querySelectorAll('.booking-row').forEach(row => {
+        const buttons = row.querySelectorAll('.update-status-btn, .view-details-btn');
+        buttons.forEach(btn => {
+          if (btn.getAttribute('data-booking-id') === currentBookingId) {
+            const statusCell = row.querySelector('td:nth-child(4)');
+            const statusSpan = statusCell.querySelector('span');
+            
+            // Update text
+            statusSpan.textContent = newStatus;
+            
+            // Update classes
+            statusSpan.className = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full';
+            
+            if (newStatus === 'Confirmed') {
+              statusSpan.classList.add('bg-green-100', 'text-green-800');
+            } else if (newStatus === 'Pending') {
+              statusSpan.classList.add('bg-yellow-100', 'text-yellow-800');
+            } else if (newStatus === 'Cancelled') {
+              statusSpan.classList.add('bg-red-100', 'text-red-800');
+            } else {
+              statusSpan.classList.add('bg-blue-100', 'text-blue-800');
+            }
+            
+            // Update data attribute for filtering
+            row.setAttribute('data-status', newStatus.toLowerCase());
+          }
+        });
+      });
+      
+      // Close modal
+      document.getElementById('update-status-modal').classList.add('hidden');
+      
+      // Show success message (in a real app)
+      alert('Status updated successfully!');
+    });
+
+    // Initialize search on keyup
+    document.getElementById('search').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        filterBookings();
+      }
+    });
+  });
+</script>
+{% endblock %}

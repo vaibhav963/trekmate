@@ -1,0 +1,144 @@
+{% extends 'trek_planner/base.html' %}
+
+{% block title %}My Bookings - TrekMate{% endblock %}
+
+{% block content %}
+<!-- Alert Messages -->
+{% if messages %}
+<div class="container mx-auto px-4 mt-4">
+    {% for message in messages %}
+        <div class="p-4 mb-4 text-white rounded-lg shadow-md transition-all duration-300 ease-in-out
+             {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium">{{ message }}</span>
+                <button onclick="this.parentElement.parentElement.classList.add('opacity-0'); setTimeout(() => this.parentElement.parentElement.style.display='none', 300)" 
+                        class="text-white hover:text-gray-200 focus:outline-none transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 py-8">
+    <header class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">My Bookings</h1>
+        <p class="text-gray-600 mt-2">Manage your trek reservations and view their status</p>
+    </header>
+    
+    {% if bookings %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Trek
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Booking Date
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for booking in bookings %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-150 ease-in-out">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ booking.trek.name }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-500">{{ booking.booking_date|date:"M d, Y H:i" }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if booking.status == 'Confirmed' %}
+                                    bg-green-100 text-green-800
+                                {% elif booking.status == 'Pending' %}
+                                    bg-yellow-100 text-yellow-800
+                                {% elif booking.status == 'Cancelled' %}
+                                    bg-red-100 text-red-800
+                                {% else %}
+                                    bg-blue-100 text-blue-800
+                                {% endif %}">
+                                {{ booking.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow-md p-8 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+        <h2 class="text-xl font-semibold text-gray-700 mb-2">No Bookings Found</h2>
+        <p class="text-gray-600 mb-4">You haven't booked any treks yet.</p>
+        <a href="{% url 'trek_list' %}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+            Explore Treks
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+{% comment %} {% extends 'trek_planner/base.html' %}
+{% block title %}My Bookings - TrekMate{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+    <div class="container mx-auto px-4 mt-4">
+        {% for message in messages %}
+            <div class="p-4 mb-4 text-white rounded-lg shadow-md 
+                {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium">{{ message }}</span>
+                    <button onclick="this.parentElement.parentElement.style.display='none'" class="text-white focus:outline-none">
+                        ✖
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">My Bookings</h1>
+    
+    {% if bookings %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow rounded-lg">
+            <thead>
+                <tr>
+                    <th class="py-3 px-5 bg-gray-100">Trek</th>
+                    <th class="py-3 px-5 bg-gray-100">Booking Date</th>
+                    <th class="py-3 px-5 bg-gray-100">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr class="border-b">
+                    <td class="py-3 px-5">{{ booking.trek.name }}</td>
+                    <td class="py-3 px-5">{{ booking.booking_date|date:"M d, Y H:i" }}</td>
+                    <td class="py-3 px-5">{{ booking.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-gray-600">You have not booked any treks yet.</p>
+    {% endif %}
+</div>
+{% endblock %} {% endcomment %}
