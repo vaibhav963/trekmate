@@ -20,7 +20,6 @@ class BookingForm(forms.ModelForm):
         }
 
 
-
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
     class Meta:
