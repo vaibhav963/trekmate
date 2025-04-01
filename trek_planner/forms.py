@@ -19,13 +19,11 @@ class BookingForm(forms.ModelForm):
             'payment_screenshot': forms.FileInput(attrs={'class': 'w-full border px-4 py-2 rounded-md'}),
         }
 
-
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
-
 
 class UserUpdateForm(forms.ModelForm):
     class Meta:
